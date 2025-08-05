@@ -2,7 +2,8 @@
 
 pragma solidity ^0.8.27;
 
-import {SlashingRegistryCoordinator, IPauserRegistry, IAllocationManager, ISocketRegistry, IIndexRegistry, IBLSApkRegistry, IStakeRegistry} from "@eigenlayer-middleware/src/SlashingRegistryCoordinator.sol";
+import {IPauserRegistry} from "eigenlayer-contracts/src/contracts/interfaces/IPauserRegistry.sol";
+import {SlashingRegistryCoordinator, IAllocationManager, ISocketRegistry, IIndexRegistry, IBLSApkRegistry, IStakeRegistry} from "@eigenlayer-middleware/src/SlashingRegistryCoordinator.sol";
 
 contract MinimalRegistryCoordinator is SlashingRegistryCoordinator {
     constructor(

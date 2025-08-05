@@ -17,8 +17,27 @@ import {IAllocationManager} from "eigenlayer-contracts/src/contracts/interfaces/
 import {IRewardsCoordinator} from "eigenlayer-contracts/src/contracts/interfaces/IRewardsCoordinator.sol";
 import {IPermissionController} from "eigenlayer-contracts/src/contracts/interfaces/IPermissionController.sol";
 import {MinimalRegistryCoordinator} from "./MinimalRegistryCoordinator.sol";
+import {
+    TransparentUpgradeableProxy,
+    ITransparentUpgradeableProxy
+} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {IPauserRegistry} from "eigenlayer-contracts/src/contracts/interfaces/IPauserRegistry.sol";
+import {PauserRegistry} from "eigenlayer-contracts/src/contracts/permissions/PauserRegistry.sol";
 
-contract Empty{}
+
+import {SocketRegistry} from "@eigenlayer-middleware/src/SocketRegistry.sol";
+import {StakeRegistry, IStrategy} from "@eigenlayer-middleware/src/StakeRegistry.sol";
+import {IStakeRegistry} from "@eigenlayer-middleware/src/interfaces/IStakeRegistry.sol";
+import {MinimalServiceManager, ServiceManagerConstructorParams} from "./MinimalServiceManager.sol";
+import {IRegistryCoordinator} from "@eigenlayer-middleware/src/interfaces/IRegistryCoordinator.sol";
+import {
+    SlashingRegistryCoordinator,
+    ISlashingRegistryCoordinator
+} from "@eigenlayer-middleware/src/SlashingRegistryCoordinator.sol";
+import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import {SlashingRegistryCoordinator, IAllocationManager, ISocketRegistry, IIndexRegistry, IBLSApkRegistry, IStakeRegistry} from "@eigenlayer-middleware/src/SlashingRegistryCoordinator.sol";
+
+contract EmptyContract{}
 
 struct DeployParams {
     IDelegationManager delegationManager;
@@ -43,12 +62,12 @@ contract Deployer {
             address apkRegistryProxy,
             address slashingRegistryCoordinatorProxy,
             address serviceManagerProxy,
-            address proxyAdmin,
+            ProxyAdmin proxyAdmin,
             address tracer
         )
     {
         address emptyContract = address(new EmptyContract());
-
+        proxyAdmin = new ProxyAdmin();
         address[] memory pausers = new address[](1);
         pausers[0] = params.initialOwner;
 
@@ -112,7 +131,7 @@ contract Deployer {
         proxyAdmin.upgradeAndCall(
             ITransparentUpgradeableProxy(payable(serviceManagerProxy)),
             address(
-                new ServiceManager(
+                new MinimalServiceManager(
                     ServiceManagerConstructorParams({
                         avsDirectory: params.avsDirectory,
                         rewardsCoordinator: params.rewardsCoordinator,
@@ -124,7 +143,7 @@ contract Deployer {
                 )
             ),
             abi.encodeWithSelector(
-                ServiceManager.initialize.selector,
+                MinimalServiceManager.initialize.selector,
                 params.deployer,
                 params.rewardsInitiator,
                 params.metadataURI
