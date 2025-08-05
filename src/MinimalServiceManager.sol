@@ -20,9 +20,9 @@ struct ServiceManagerConstructorParams {
 }
 
 /**
- * @title ServiceManager
+ * @title MinimalServiceManager
  */
-contract ServiceManager is ServiceManagerBase {
+contract MinimalServiceManager is ServiceManagerBase {
     constructor(
         ServiceManagerConstructorParams memory params
     )
