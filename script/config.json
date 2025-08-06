@@ -1,0 +1,18 @@
+{
+    "contracts": {
+        "delegationManager": "0xD4A7E1Bd8015057293f0D0A557088c286942e84b",
+        "avsDirectory": "0xa789c91ECDdae96865913130B786140Ee17aF545",
+        "rewardCoordinator": "0x5ae8152fb88c26ff9ca5C014c94fca3c68029349",
+        "allocationManager": "0x42583067658071247ec8CE0A516A58f682002d07",
+        "permissionController": "0x44632dfBdCb6D3E21EF613B0ca8A6A0c618F5a37"
+    },
+    "roles": {
+        "owner": "0xa03555A5E9729a9bE6FFc92F8fbC50456C0aFc57",
+        "rewardsInitiator": "0xa03555A5E9729a9bE6FFc92F8fbC50456C0aFc57",
+        "churnApprover": "0xa03555A5E9729a9bE6FFc92F8fbC50456C0aFc57"
+    },
+    "parameters": {
+        "metadataURI": "https://example.com",
+        "lookaheadPeriod": 42
+    }
+}
