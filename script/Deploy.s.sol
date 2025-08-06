@@ -13,6 +13,11 @@ import {IPermissionController} from "eigenlayer-contracts/src/contracts/interfac
 import {console} from "forge-std/console.sol";
 import {DeployParams} from "../src/Deployer.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import {ISlashingRegistryCoordinator, ISlashingRegistryCoordinatorTypes} from "@eigenlayer-middleware/src/interfaces/ISlashingRegistryCoordinator.sol";
+import {IServiceManager} from "@eigenlayer-middleware/src/interfaces/IServiceManager.sol";
+import {IStakeRegistryTypes} from "@eigenlayer-middleware/src/interfaces/IStakeRegistry.sol";
+import {IStrategyManager} from "eigenlayer-contracts/src/contracts/interfaces/IStrategyManager.sol";
+import {IStrategy} from "eigenlayer-contracts/src/contracts/interfaces/IStrategy.sol";
 
 contract Deploy is Deployer, Script {
     // Eigenlayer Core Contracts
@@ -91,6 +96,12 @@ contract Deploy is Deployer, Script {
         console.log("Lookahead Period:", lookaheadPeriod);
     }
 
+
+    function _logDeploy(string memory contractName, address deployedAddress) internal returns (string memory) {
+        console.log("Deployed", contractName, "at:", deployedAddress);
+        return vm.serializeAddress("contracts", contractName, deployedAddress);
+    }
+
     function _deploy() internal {
         vm.startBroadcast();
 
@@ -117,13 +128,52 @@ contract Deploy is Deployer, Script {
             ProxyAdmin proxyAdmin,
             address tracer
         ) = _create(params);
-        
+
         slashingRegistryCoordinatorProxy = _slashingRegistryCoordinatorProxy;
         serviceManagerProxy = _serviceManagerProxy;
 
-        vm.stopBroadcast();
-    }
+        // Create Operator Set
+        ISlashingRegistryCoordinatorTypes.OperatorSetParam
+            memory operatorSetParams = ISlashingRegistryCoordinatorTypes
+                .OperatorSetParam({
+                    maxOperatorCount: 10,
+                    kickBIPsOfOperatorStake: 100,
+                    kickBIPsOfTotalStake: 100
+                });
 
+        IStakeRegistryTypes.StrategyParams[]
+            memory strategyParams = new IStakeRegistryTypes.StrategyParams[](1);
+
+        strategyParams[0] = IStakeRegistryTypes.StrategyParams({
+            strategy: IStrategy(0x8E93249a6C37a32024756aaBd813E6139b17D1d5	), // sepolia Eigen,
+            multiplier: 1 ether
+        });
+
+        ISlashingRegistryCoordinator(slashingRegistryCoordinatorProxy)
+            .createSlashableStakeQuorum(
+                operatorSetParams,
+                0,
+                strategyParams,
+                uint32(lookaheadPeriod)
+            );
+
+        proxyAdmin.transferOwnership(owner);
+        // IServiceManager(serviceManagerProxy).transferOwnership(owner);
+        // ISlashingRegistryCoordinator(slashingRegistryCoordinatorProxy)
+        //     .transferOwnership(owner);
+        vm.stopBroadcast();
+
+        // Log deployments
+        string memory json = vm.serializeJson("contracts", "{}"); // Creates empty JSON object
+
+        json = _logDeploy("indexRegistryProxy", indexRegistryProxy);
+        json = _logDeploy("stakeRegistryProxy", stakeRegistryProxy);
+        json = _logDeploy("slashingRegistryCoordinatorProxy", slashingRegistryCoordinatorProxy);
+        json = _logDeploy("apkRegistryProxy", apkRegistryProxy);
+        json = _logDeploy("ServiceManager", serviceManagerProxy);
+        json = _logDeploy("proxyAdmin", address(proxyAdmin));
+        vm.writeJson(json, "./DeployedContracts.json");
+    }
 
     function run() public {
         _parseConfig();
