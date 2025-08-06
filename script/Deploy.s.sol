@@ -155,7 +155,7 @@ contract Deploy is Deployer, Script {
             memory strategyParams = new IStakeRegistryTypes.StrategyParams[](1);
 
         strategyParams[0] = IStakeRegistryTypes.StrategyParams({
-            strategy: IStrategy(0x8E93249a6C37a32024756aaBd813E6139b17D1d5), // sepolia Eigen,
+            strategy: IStrategy(0x424246eF71b01ee33aA33aC590fd9a0855F5eFbc), // WETH Strategy,
             multiplier: 1 ether
         });
 
