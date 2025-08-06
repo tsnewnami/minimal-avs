@@ -1,0 +1,11 @@
+{
+    "contracts": {
+        "delegationManager": "0xD4A7E1Bd8015057293f0D0A557088c286942e84b",
+        "allocationManager": "0x42583067658071247ec8CE0A516A58f682002d07"
+    },
+    "avs": "0x0000000000000000000000000000000000000000",
+    "token": "0xc5B857A92245f64e9D90cCc5b096Db82eB77eB5c",
+    "strategy": "0x8E93249a6C37a32024756aaBd813E6139b17D1d5",
+    "metadataURI": "https://raw.githubusercontent.com/tsnewnami/minimal-avs/master/metadata.json",
+    "operatorSetId": 0
+}

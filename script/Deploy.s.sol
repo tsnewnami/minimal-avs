@@ -19,6 +19,16 @@ import {IStakeRegistryTypes} from "@eigenlayer-middleware/src/interfaces/IStakeR
 import {IStrategyManager} from "eigenlayer-contracts/src/contracts/interfaces/IStrategyManager.sol";
 import {IStrategy} from "eigenlayer-contracts/src/contracts/interfaces/IStrategy.sol";
 
+
+// forge script Deploy \
+//   --rpc-url <rpc-url> \
+//   --private-key <your-private-key> \
+//   --verify \
+//   --etherscan-api-key <your-api-key> \
+//   --broadcast \
+//   --slow
+
+
 contract Deploy is Deployer, Script {
     // Eigenlayer Core Contracts
     IDelegationManager public _delegationManager;
@@ -42,7 +52,7 @@ contract Deploy is Deployer, Script {
     uint256 public lookaheadPeriod;
 
     function _parseConfig() internal {
-        string memory config = vm.readFile("script/config.json");
+        string memory config = vm.readFile("script/deployConfig.json");
 
         // Parse contract addresses
         _delegationManager = IDelegationManager(
@@ -145,7 +155,7 @@ contract Deploy is Deployer, Script {
             memory strategyParams = new IStakeRegistryTypes.StrategyParams[](1);
 
         strategyParams[0] = IStakeRegistryTypes.StrategyParams({
-            strategy: IStrategy(0x8E93249a6C37a32024756aaBd813E6139b17D1d5	), // sepolia Eigen,
+            strategy: IStrategy(0x8E93249a6C37a32024756aaBd813E6139b17D1d5), // sepolia Eigen,
             multiplier: 1 ether
         });
 
