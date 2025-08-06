@@ -1,7 +1,7 @@
 {
-    "name": "example avs",
+    "name": "Minimal AVS",
     "website": "https://www.example.com",
-    "description": "Life, Universe, Everything",
-    "logo": "https://raw.githubusercontent.com/DIN-center/eigendata/master/avs/testavs/logo.png",
+    "description": "Minimal AVS deployment",
+    "logo": "https://raw.githubusercontent.com/tsnewnami/minimal-avs/master/logo.png",
     "twitter": "https://x.com/example"
 }

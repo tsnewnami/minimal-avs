@@ -9,10 +9,11 @@
     "roles": {
         "owner": "0xa03555A5E9729a9bE6FFc92F8fbC50456C0aFc57",
         "rewardsInitiator": "0xa03555A5E9729a9bE6FFc92F8fbC50456C0aFc57",
-        "churnApprover": "0xa03555A5E9729a9bE6FFc92F8fbC50456C0aFc57"
+        "churnApprover": "0xa03555A5E9729a9bE6FFc92F8fbC50456C0aFc57",
+        "ejector": "0xa03555A5E9729a9bE6FFc92F8fbC50456C0aFc57"
     },
     "parameters": {
-        "metadataURI": "https://example.com",
+        "metadataURI": "https://raw.githubusercontent.com/tsnewnami/minimal-avs/master/metadata.json",
         "lookaheadPeriod": 42
     }
 }

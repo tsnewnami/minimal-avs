@@ -12,6 +12,7 @@ import {IAllocationManager} from "eigenlayer-contracts/src/contracts/interfaces/
 import {IPermissionController} from "eigenlayer-contracts/src/contracts/interfaces/IPermissionController.sol";
 import {console} from "forge-std/console.sol";
 import {DeployParams} from "../src/Deployer.sol";
+import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
 contract Deploy is Deployer, Script {
     // Eigenlayer Core Contracts
@@ -25,6 +26,7 @@ contract Deploy is Deployer, Script {
     address public owner;
     address public rewardsInitiator;
     address public churnApprover;
+    address public ejector;
 
     // Deployed middleware contracts
     address public serviceManagerProxy;
@@ -90,6 +92,8 @@ contract Deploy is Deployer, Script {
     }
 
     function _deploy() internal {
+        vm.startBroadcast();
+
         DeployParams memory params = DeployParams({
             delegationManager: _delegationManager,
             avsDirectory: _avsDirectory,
@@ -99,9 +103,9 @@ contract Deploy is Deployer, Script {
             initialOwner: owner,
             rewardsInitiator: rewardsInitiator,
             churnApprover: churnApprover,
-            metadataURI: metadataURI,
+            ejector: ejector,
             deployer: msg.sender,
-            lookaheadPeriod: lookaheadPeriod
+            metadataURI: metadataURI
         });
 
         (
@@ -117,11 +121,13 @@ contract Deploy is Deployer, Script {
         slashingRegistryCoordinatorProxy = _slashingRegistryCoordinatorProxy;
         serviceManagerProxy = _serviceManagerProxy;
 
+        vm.stopBroadcast();
     }
 
 
     function run() public {
         _parseConfig();
         _printConfig();
+        _deploy();
     }
 }
