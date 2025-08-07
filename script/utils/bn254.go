@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"math/big"
 	"os"
 
 	bn254 "github.com/consensys/gnark-crypto/ecc/bn254"
+	"github.com/joho/godotenv"
 )
 
 // Error types for precompile compatibility
@@ -91,10 +93,16 @@ func GenerateKeyPair(sk *big.Int) (*PrivateKey, *PublicKey, error) {
 }
 
 func main() {
-	// Parse args
-	arg1 := os.Args[1]
+	// Parse env args
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
+	// Get environment variables
+	blsPrivKey := os.Getenv("BLS_PRIV_KEY")
 	n := new(big.Int)
-	n.SetString(arg1, 10)
+	n.SetString(blsPrivKey, 10)
 
 	// Generate key pair
 	_, pubKey, err := GenerateKeyPair(n)
@@ -122,12 +130,12 @@ func main() {
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "  ")
 	if err := encoder.Encode(map[string]string{
-		"g1X":  g1X,
-		"g1Y":  g1Y,
-		"g2X":  g2X,
-		"g2X1": g2X1,
-		"g2Y":  g2Y,
-		"g2Y1": g2Y1,
+		"G1X":  g1X,
+		"G1Y":  g1Y,
+		"G2X0":  g2X,
+		"G2X1": g2X1,
+		"G2Y0":  g2Y,
+		"G2Y1": g2Y1,
 	}); err != nil {
 		fmt.Println("Error encoding JSON:", err)
 	}

@@ -5,9 +5,9 @@ pragma solidity ^0.8.27;
 import {Script} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {IDelegationManager} from "eigenlayer-contracts/src/contracts/interfaces/IDelegationManager.sol";
-import {IAllocationManager} from "eigenlayer-contracts/src/contracts/interfaces/IAllocationManager.sol";
+import {IAllocationManager, IAllocationManagerTypes} from "eigenlayer-contracts/src/contracts/interfaces/IAllocationManager.sol";
 import {IStrategyManager} from "eigenlayer-contracts/src/contracts/interfaces/IStrategyManager.sol";
-import {ISlashingRegistryCoordinator} from "eigenlayer-middleware/src/interfaces/ISlashingRegistryCoordinator.sol";
+import {ISlashingRegistryCoordinator, ISlashingRegistryCoordinatorTypes} from "eigenlayer-middleware/src/interfaces/ISlashingRegistryCoordinator.sol";
 import {IStrategy} from "eigenlayer-contracts/src/contracts/interfaces/IStrategy.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IBLSApkRegistryTypes} from "@eigenlayer-middleware/src/interfaces/IBLSApkRegistry.sol";
@@ -46,7 +46,10 @@ contract Register is Script {
             stdJson.readAddress(config, "$.contracts.strategyManager")
         );
         _slashingRegistryCoordinator = ISlashingRegistryCoordinator(
-            stdJson.readAddress(config, "$.contracts.slashingRegistryCoordinator")
+            stdJson.readAddress(
+                config,
+                "$.contracts.slashingRegistryCoordinator"
+            )
         );
         avs = stdJson.readAddress(config, "$.avs");
         token = stdJson.readAddress(config, "$.token");
@@ -58,17 +61,23 @@ contract Register is Script {
         operator = stdJson.readAddress(config, "$.operatorPubkey");
     }
 
-
     function _registerAsEigenOperator() internal {
         _delegationManager.registerAsOperator(address(0), 10, metadataURI);
     }
 
     function _depositIntoStrategy() internal {
         IERC20(token).approve(address(_strategyManager), type(uint256).max);
-        _strategyManager.depositIntoStrategy(IStrategy(strategy), IERC20(token), 0.000001 ether);
+        _strategyManager.depositIntoStrategy(
+            IStrategy(strategy),
+            IERC20(token),
+            0.000001 ether
+        );
     }
 
-    function _parseBLSKeys() internal returns (BN254.G1Point memory, BN254.G2Point memory) {
+    function _parseBLSKeys()
+        internal
+        returns (BN254.G1Point memory, BN254.G2Point memory)
+    {
         string memory config = vm.readFile("script/BLSConfig.json");
         uint256 G1X = stdJson.readUint(config, "$.G1X");
         uint256 G1Y = stdJson.readUint(config, "$.G1Y");
@@ -83,28 +92,51 @@ contract Register is Script {
     }
 
     function _registerToOperatorSet() internal {
-        (BN254.G1Point memory pubkeyG1, BN254.G2Point memory pubkeyG2) = _parseBLSKeys();
+        uint256 operatorPrivateKey = vm.envUint("BLS_PRIV_KEY");
+        (
+            BN254.G1Point memory pubkeyG1,
+            BN254.G2Point memory pubkeyG2
+        ) = _parseBLSKeys();
 
         IBLSApkRegistryTypes.PubkeyRegistrationParams memory registrationParams;
         registrationParams.pubkeyG1 = pubkeyG1;
         registrationParams.pubkeyG2 = pubkeyG2;
 
+        // Get the pubkey registration message hash that needs to be signed
+        BN254.G1Point
+            memory pubkeyRegistrationMessageHash = _slashingRegistryCoordinator
+                .pubkeyRegistrationMessageHash(operator);
+        registrationParams.pubkeyRegistrationSignature = BN254.scalar_mul(
+            pubkeyRegistrationMessageHash,
+            operatorPrivateKey
+        );
+        bytes memory data = abi.encode(
+            ISlashingRegistryCoordinatorTypes.RegistrationType.NORMAL,
+            "socket",
+            registrationParams
+        );
 
-        // // Get the pubkey registration message hash that needs to be signed
-        // bytes32 pubkeyRegistrationMessageHash = _slashingRegistryCoordinator.calculatePubkeyRegistrationMessageHash(operator);
-        // console.log("pubkeyRegistrationMessageHash", pubkeyRegistrationMessageHash);
+        uint32[] memory operatorSetIds = new uint32[](1);
+        operatorSetIds[0] = uint32(operatorSetId);
 
-        // _allocationManager.registerForOperatorSets(avs, token, strategy, metadataURI);
+        IAllocationManagerTypes.RegisterParams
+            memory registerParams = IAllocationManagerTypes.RegisterParams({
+                avs: avs,
+                operatorSetIds: operatorSetIds,
+                data: data
+            });
+
+        _allocationManager.registerForOperatorSets(
+            operator,
+            registerParams
+        );
     }
 
     function run() public {
-        _parseConfig();
         uint256 operatorPrivateKey = vm.envUint("ECDSA_PRIV_KEY");
+        vm.startBroadcast(operatorPrivateKey);
+        _parseConfig();
         _registerToOperatorSet();
-        // vm.startBroadcast(operatorPrivateKey);
-        // _registerAsEigenOperator();
-        // _depositIntoStrategy();
-        // _registerToOperatorSet();
-        // vm.stopBroadcast();
+        vm.stopBroadcast();
     }
 }
