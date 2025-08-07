@@ -2,11 +2,13 @@
     "contracts": {
         "delegationManager": "0xD4A7E1Bd8015057293f0D0A557088c286942e84b",
         "allocationManager": "0x42583067658071247ec8CE0A516A58f682002d07",
-        "strategyManager": "0x2E3D6c0744b10eb0A4e6F679F71554a39Ec47a5D"
+        "strategyManager": "0x2E3D6c0744b10eb0A4e6F679F71554a39Ec47a5D",
+        "slashingRegistryCoordinator": "0xFcF9a85B50393C33627858E8a399b1C1e668652A"
     },
     "avs": "0x4063BAAE0E21572335C8424d05AD623f936cE597",
     "token": "0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9",
     "strategy": "0x424246eF71b01ee33aA33aC590fd9a0855F5eFbc",
     "metadataURI": "https://raw.githubusercontent.com/tsnewnami/minimal-avs/master/metadata.json",
-    "operatorSetId": 0
+    "operatorSetId": 0,
+    "operatorPubkey": "0x8BF6c4B074C0247A6e72F32732340e5C1b6e84df"
 }
