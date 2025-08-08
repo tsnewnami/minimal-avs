@@ -3,13 +3,14 @@ pragma solidity ^0.8.27;
 
 import {Script} from "forge-std/Script.sol";
 import {IAllocationManager, IAllocationManagerTypes} from "eigenlayer-contracts/src/contracts/interfaces/IAllocationManager.sol";
-import {IKeyRegistrar} from "eigenlayer-contracts/src/contracts/interfaces/IKeyRegistrar.sol";
+import {IKeyRegistrar, IKeyRegistrarTypes} from "eigenlayer-contracts/src/contracts/interfaces/IKeyRegistrar.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {console} from "forge-std/console.sol";
 import {MinimalAVSRegistrar} from "../src/MinimalAVSRegistrar.sol";
 import {IAVSRegistrar} from "eigenlayer-contracts/src/contracts/interfaces/IAVSRegistrar.sol";
 import {IStrategy} from "eigenlayer-contracts/src/contracts/interfaces/IStrategy.sol";
+import {OperatorSet} from "eigenlayer-contracts/src/contracts/libraries/OperatorSetLib.sol";
 
 contract Deploy is Script {
     // Eigenlayer Core Contracts
@@ -84,15 +85,19 @@ contract Deploy is Script {
         });
         ALLOCATION_MANAGER.createOperatorSets(avs, createOperatorSetParams);
 
+        // Configure Operator Set
+        OperatorSet memory operatorSet = OperatorSet({avs: avs, id: 0});
+        KEY_REGISTRAR.configureOperatorSet(operatorSet, IKeyRegistrarTypes.CurveType.ECDSA);
+
         vm.stopBroadcast();
     }
 
     function run() public {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_DEPLOYER");
+        uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIV_KEY");
         address deployer = vm.addr(deployerPrivateKey);
         console.log("Deployer address:", deployer);
 
-        uint256 avsPrivateKey = vm.envUint("PRIVATE_KEY_AVS");
+        uint256 avsPrivateKey = vm.envUint("AVS_PRIV_KEY");
         address avs = vm.addr(avsPrivateKey);
         console.log("AVS address:", avs);
  
