@@ -16,7 +16,6 @@ import {OperatorSet} from "eigenlayer-contracts/src/contracts/libraries/Operator
 import "openzeppelin-contracts/contracts/utils/Strings.sol";
 
 contract Register is Script {
-    using BN254 for BN254.G1Point;
     using Strings for uint256;
 
     // Eigenlayer Core Contracts
