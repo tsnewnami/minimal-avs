@@ -113,8 +113,8 @@ contract Register is Script {
 
         vm.startBroadcast(operatorPrivateKey);
 
-        // _registerAsEigenOperator();
-        // _depositIntoStrategy();
+        _registerAsEigenOperator();
+        _depositIntoStrategy();
         _registerOperatorKey(
             operatorPrivateKey,
             operator,
